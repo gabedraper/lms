@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,7 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BookOpen, Eye, Pencil } from "lucide-react";
+import { BookOpen, Eye, Pencil, Plus } from "lucide-react";
+import { createCourse } from "@/actions/courses";
+
+async function handleCreate(formData: FormData) {
+  "use server";
+  const result = await createCourse(formData);
+  if (result?.success && result?.course?.id) {
+    redirect(`/instructor/courses/${result.course.id}`);
+  }
+}
 
 export default async function AdminCoursesPage() {
   const supabase = createClient();
@@ -21,11 +31,20 @@ export default async function AdminCoursesPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">All Courses</h1>
-        <p className="text-muted-foreground mt-1">
-          View and preview all courses in the system
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">All Courses</h1>
+          <p className="text-muted-foreground mt-1">
+            Create and manage courses
+          </p>
+        </div>
+        <form action={handleCreate}>
+          <input type="hidden" name="title" value="New Course" />
+          <Button type="submit">
+            <Plus className="h-4 w-4 mr-2" />
+            New Course
+          </Button>
+        </form>
       </div>
 
       {(!courses || courses.length === 0) ? (
