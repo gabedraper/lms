@@ -140,7 +140,7 @@ export default function LessonEditPage() {
     value: string | number | string[]
   ) {
     const updated = [...questions];
-    (updated[idx] as Record<string, unknown>)[field] = value;
+    updated[idx] = { ...updated[idx], [field]: value };
     setQuestions(updated);
   }
 
