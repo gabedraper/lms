@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BookOpen } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,8 +24,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
-
-  const lmsName = process.env.NEXT_PUBLIC_LMS_NAME || "Team Learning Academy";
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -44,7 +42,6 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      // Fetch profile to determine role-based redirect
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -68,12 +65,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-2">
-            <div className="bg-primary rounded-full p-3">
-              <BookOpen className="h-6 w-6 text-white" />
-            </div>
+          <div className="flex justify-center mb-4">
+            <Image
+              src="https://facturmfg.com/wp-content/uploads/2022/11/Factur-Logo-300x94.png"
+              alt="Factur logo"
+              width={160}
+              height={50}
+              className="object-contain"
+            />
           </div>
-          <CardTitle className="text-2xl">{lmsName}</CardTitle>
+          <CardTitle className="text-2xl">Learning Academy</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
@@ -95,7 +96,15 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
