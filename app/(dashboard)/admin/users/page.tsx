@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { UserPlus, KeyRound, Trash2 } from "lucide-react";
+import { ROLES } from "@/lib/roles";
 
 interface UserProfile {
   id: string;
@@ -33,9 +34,9 @@ interface UserProfile {
 
 const roleColors: Record<string, string> = {
   admin: "bg-red-100 text-red-700",
-  manager: "bg-purple-100 text-purple-700",
-  instructor: "bg-blue-100 text-blue-700",
-  learner: "bg-green-100 text-green-700",
+  bdm: "bg-blue-100 text-blue-700",
+  obdm: "bg-purple-100 text-purple-700",
+  sdr: "bg-green-100 text-green-700",
 };
 
 export default function AdminUsersPage() {
@@ -153,10 +154,9 @@ export default function AdminUsersPage() {
                 <Select value={inviteRole} onValueChange={setInviteRole}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="learner">Learner</SelectItem>
-                    <SelectItem value="instructor">Instructor</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    {Object.entries(ROLES).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -214,14 +214,13 @@ export default function AdminUsersPage() {
                         value={user.role}
                         onValueChange={(val) => handleRoleChange(user.id, val)}
                       >
-                        <SelectTrigger className="w-32 h-7 text-xs">
+                        <SelectTrigger className="w-48 h-7 text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="learner">Learner</SelectItem>
-                          <SelectItem value="instructor">Instructor</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
+                          {Object.entries(ROLES).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>{label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </td>

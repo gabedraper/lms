@@ -14,6 +14,7 @@ import {
   Award,
   LogOut,
 } from "lucide-react";
+import { getRoleLabel } from "@/lib/roles";
 
 interface NavItem {
   href: string;
@@ -22,31 +23,19 @@ interface NavItem {
 }
 
 function getNavItems(role: string): NavItem[] {
-  switch (role) {
-    case "admin":
-      return [
-        { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-        { href: "/admin/users", label: "Users", icon: <Users className="h-4 w-4" /> },
-        { href: "/admin/learning-paths", label: "Learning Paths", icon: <Map className="h-4 w-4" /> },
-        { href: "/admin/courses", label: "All Courses", icon: <BookOpen className="h-4 w-4" /> },
-      ];
-    case "manager":
-      return [
-        { href: "/manager", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-        { href: "/manager", label: "My Team", icon: <Users className="h-4 w-4" /> },
-      ];
-    case "instructor":
-      return [
-        { href: "/instructor", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-        { href: "/instructor/courses", label: "My Courses", icon: <BookOpen className="h-4 w-4" /> },
-      ];
-    case "learner":
-    default:
-      return [
-        { href: "/learner", label: "My Learning", icon: <GraduationCap className="h-4 w-4" /> },
-        { href: "/learner/certificates", label: "Certificates", icon: <Award className="h-4 w-4" /> },
-      ];
+  if (role === "admin") {
+    return [
+      { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+      { href: "/admin/users", label: "Users", icon: <Users className="h-4 w-4" /> },
+      { href: "/admin/role-training", label: "Role Training", icon: <Map className="h-4 w-4" /> },
+      { href: "/admin/courses", label: "All Courses", icon: <BookOpen className="h-4 w-4" /> },
+    ];
   }
+  // BDM, OBDM, SDR — all get the learner view
+  return [
+    { href: "/learner", label: "My Training", icon: <GraduationCap className="h-4 w-4" /> },
+    { href: "/learner/certificates", label: "Certificates", icon: <Award className="h-4 w-4" /> },
+  ];
 }
 
 export default async function DashboardLayout({
@@ -101,7 +90,7 @@ export default async function DashboardLayout({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground capitalize">{role}</p>
+              <p className="text-xs text-muted-foreground">{getRoleLabel(role)}</p>
             </div>
           </div>
         </div>
