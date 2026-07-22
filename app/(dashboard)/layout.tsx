@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Award,
   LogOut,
+  BarChart2,
 } from "lucide-react";
 import { getRoleLabel } from "@/lib/roles";
 
@@ -29,6 +30,7 @@ function getNavItems(role: string): NavItem[] {
       { href: "/admin/users", label: "Users", icon: <Users className="h-4 w-4" /> },
       { href: "/admin/role-training", label: "Role Training", icon: <Map className="h-4 w-4" /> },
       { href: "/admin/courses", label: "All Courses", icon: <BookOpen className="h-4 w-4" /> },
+      { href: "/admin/progress", label: "Team Progress", icon: <BarChart2 className="h-4 w-4" /> },
     ];
   }
   // BDM, OBDM, SDR — all get the learner view
