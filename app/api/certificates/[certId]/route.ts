@@ -42,7 +42,7 @@ export async function GET(
       lmsName,
     });
 
-    const stream = await renderToStream(element);
+    const stream = await renderToStream(element as any);
 
     const chunks: Buffer[] = [];
     for await (const chunk of stream as AsyncIterable<Buffer>) {

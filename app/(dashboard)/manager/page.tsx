@@ -118,7 +118,7 @@ export default async function ManagerDashboard() {
                 </div>
                 {member.enrollments.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {member.enrollments.slice(0, 3).map((e) => (
+                    {member.enrollments.slice(0, 3).map((e: any) => (
                       <div
                         key={e.id}
                         className="text-xs px-2 py-1 bg-muted rounded-md flex items-center gap-1"
