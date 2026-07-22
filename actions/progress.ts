@@ -46,7 +46,7 @@ export async function markLessonComplete(
     return { progress: 0, certificateIssued: false };
   }
 
-  const moduleData = lessonData.modules as { course_id: string } | null;
+  const moduleData = (Array.isArray(lessonData.modules) ? lessonData.modules[0] : lessonData.modules) as { course_id: string } | null;
   if (!moduleData) {
     return { progress: 0, certificateIssued: false };
   }
