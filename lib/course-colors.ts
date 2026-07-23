@@ -1,33 +1,33 @@
-const GRADIENTS = [
-  "from-rose-500 to-orange-400",
-  "from-violet-600 to-pink-500",
-  "from-cyan-500 to-blue-600",
-  "from-emerald-500 to-teal-400",
-  "from-amber-500 to-red-500",
-  "from-indigo-600 to-violet-500",
-  "from-pink-500 to-rose-400",
-  "from-sky-500 to-cyan-400",
-  "from-green-500 to-emerald-400",
-  "from-orange-500 to-amber-400",
-  "from-fuchsia-600 to-pink-500",
-  "from-blue-600 to-sky-400",
-  "from-red-500 to-pink-500",
-  "from-teal-500 to-green-400",
-  "from-purple-600 to-indigo-500",
-  "from-yellow-500 to-orange-500",
-  "from-lime-500 to-green-500",
-  "from-blue-500 to-violet-600",
-  "from-rose-600 to-pink-400",
-  "from-cyan-600 to-teal-500",
+const GRADIENTS: [string, string][] = [
+  ["#f43f5e", "#fb923c"], // rose → orange
+  ["#7c3aed", "#ec4899"], // violet → pink
+  ["#06b6d4", "#2563eb"], // cyan → blue
+  ["#10b981", "#14b8a6"], // emerald → teal
+  ["#f59e0b", "#ef4444"], // amber → red
+  ["#4f46e5", "#7c3aed"], // indigo → violet
+  ["#ec4899", "#f43f5e"], // pink → rose
+  ["#0ea5e9", "#06b6d4"], // sky → cyan
+  ["#22c55e", "#10b981"], // green → emerald
+  ["#f97316", "#f59e0b"], // orange → amber
+  ["#d946ef", "#ec4899"], // fuchsia → pink
+  ["#2563eb", "#0ea5e9"], // blue → sky
+  ["#ef4444", "#ec4899"], // red → pink
+  ["#14b8a6", "#22c55e"], // teal → green
+  ["#9333ea", "#4f46e5"], // purple → indigo
+  ["#eab308", "#f97316"], // yellow → orange
+  ["#84cc16", "#22c55e"], // lime → green
+  ["#3b82f6", "#7c3aed"], // blue → violet
+  ["#e11d48", "#f472b6"], // rose → pink light
+  ["#0891b2", "#0d9488"], // cyan dark → teal dark
 ];
 
-export function getCourseGradient(id: string): string {
-  // Deterministic pick based on id characters
+export function getCourseGradientStyle(id: string): React.CSSProperties {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = (hash * 31 + id.charCodeAt(i)) % GRADIENTS.length;
   }
-  return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
+  const [from, to] = GRADIENTS[Math.abs(hash) % GRADIENTS.length];
+  return { background: `linear-gradient(135deg, ${from}, ${to})` };
 }
 
 export function extractFirstImage(html: string): string | null {

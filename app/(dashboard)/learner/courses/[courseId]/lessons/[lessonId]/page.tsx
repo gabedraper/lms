@@ -23,7 +23,7 @@ import {
   Trophy,
   Eye,
 } from "lucide-react";
-import { getCourseGradient, extractFirstImage } from "@/lib/course-colors";
+import { getCourseGradientStyle, extractFirstImage } from "@/lib/course-colors";
 
 interface QuizQuestion {
   question: string;
@@ -251,17 +251,12 @@ export default function LessonViewerPage() {
       {/* Lesson hero */}
       {(() => {
         const heroImage = content?.body ? extractFirstImage(content.body) : null;
-        const gradient = getCourseGradient(courseId);
+        const bgStyle = heroImage
+          ? { backgroundImage: `url(${heroImage})`, backgroundSize: "cover", backgroundPosition: "center" }
+          : getCourseGradientStyle(courseId);
         return (
-          <div
-            className={`relative h-48 rounded-xl mb-6 overflow-hidden bg-gradient-to-br ${gradient} flex items-end`}
-            style={heroImage ? {
-              backgroundImage: `url(${heroImage})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            } : {}}
-          >
-            {heroImage && <div className="absolute inset-0 bg-black/40" />}
+          <div className="relative h-48 rounded-xl mb-6 overflow-hidden flex items-end" style={bgStyle}>
+            <div className="absolute inset-0 bg-black/50" />
             <div className="relative z-10 p-6 w-full">
               <div className="flex items-center gap-2 mb-2">
                 <Badge className="bg-white/20 text-white border-white/30 capitalize backdrop-blur-sm">
@@ -271,13 +266,13 @@ export default function LessonViewerPage() {
                   <span className="text-sm text-white/80">{lesson.duration_minutes} min</span>
                 )}
                 {isCompleted && (
-                  <Badge className="bg-green-500/80 text-white border-transparent backdrop-blur-sm">
+                  <Badge className="bg-green-500 text-white border-transparent">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Completed
                   </Badge>
                 )}
               </div>
-              <h1 className="text-2xl font-bold text-white drop-shadow">{lesson.title}</h1>
+              <h1 className="text-2xl font-bold text-white">{lesson.title}</h1>
             </div>
           </div>
         );
