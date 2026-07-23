@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Plus, Search } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { createCourse } from "@/actions/courses";
+import { BookOpen, Plus, Search, BookMarked, Users, CheckCircle2, User } from "lucide-react";
+import { createCourse, getCoursesWithStats } from "@/actions/courses";
 import { getCourseGradientStyle } from "@/lib/course-colors";
 
 const ALPHABET = ["All", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
@@ -22,15 +21,10 @@ export default function AdminCoursesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from("courses")
-      .select("id, title, description, is_published")
-      .order("title")
-      .then(({ data }) => {
-        setCourses(data || []);
-        setLoading(false);
-      });
+    getCoursesWithStats().then((data) => {
+      setCourses(data);
+      setLoading(false);
+    });
   }, []);
 
   async function handleCreate() {
@@ -46,8 +40,7 @@ export default function AdminCoursesPage() {
 
   const filtered = courses.filter((c) => {
     const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
-    const matchesLetter =
-      letter === "All" || c.title.toUpperCase().startsWith(letter);
+    const matchesLetter = letter === "All" || c.title.toUpperCase().startsWith(letter);
     return matchesSearch && matchesLetter;
   });
 
@@ -57,9 +50,7 @@ export default function AdminCoursesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">All Courses</h1>
-          <p className="text-muted-foreground mt-1">
-            {courses.length} courses total
-          </p>
+          <p className="text-muted-foreground mt-1">{courses.length} courses total</p>
         </div>
         <Button onClick={handleCreate} disabled={creating}>
           <Plus className="h-4 w-4 mr-2" />
@@ -116,14 +107,52 @@ export default function AdminCoursesPage() {
             <Link
               key={course.id}
               href={`/admin/courses/${course.id}`}
-              className="group rounded-xl border overflow-hidden hover:shadow-md transition-shadow"
+              className="group rounded-xl border overflow-hidden hover:shadow-md transition-shadow bg-card flex flex-col"
             >
-              <div className="h-24" style={getCourseGradientStyle(course.id)} />
-              <div className="p-3">
-                <p className="font-medium text-sm line-clamp-2 leading-snug mb-1">{course.title}</p>
-                <Badge variant={course.is_published ? "default" : "secondary"} className="text-xs">
-                  {course.is_published ? "Published" : "Draft"}
-                </Badge>
+              {/* Gradient header with title */}
+              <div
+                className="relative h-32 flex items-end p-3"
+                style={getCourseGradientStyle(course.id)}
+              >
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="relative z-10 w-full">
+                  <Badge
+                    variant={course.is_published ? "default" : "secondary"}
+                    className="text-[10px] mb-1.5 opacity-90"
+                  >
+                    {course.is_published ? "Published" : "Draft"}
+                  </Badge>
+                  <p className="font-bold text-white text-base leading-snug line-clamp-2 drop-shadow">
+                    {course.title}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="p-3 flex-1 space-y-2 text-xs text-muted-foreground">
+                <div className="grid grid-cols-3 gap-1 text-center">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <BookMarked className="h-3.5 w-3.5" />
+                    <span className="font-semibold text-foreground text-sm">{course.lessonCount}</span>
+                    <span>lessons</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <Users className="h-3.5 w-3.5" />
+                    <span className="font-semibold text-foreground text-sm">{course.enrolledCount}</span>
+                    <span>enrolled</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                    <span className="font-semibold text-foreground text-sm">{course.completedCount}</span>
+                    <span>done</span>
+                  </div>
+                </div>
+                {course.ownerName && (
+                  <div className="flex items-center gap-1 pt-1 border-t">
+                    <User className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{course.ownerName}</span>
+                  </div>
+                )}
               </div>
             </Link>
           ))}
