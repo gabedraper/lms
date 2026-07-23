@@ -58,7 +58,7 @@ export default function AdminEnrollmentsPage() {
       supabase.from("profiles").select("id, full_name, role").order("full_name"),
       supabase.from("courses").select("id, title").order("title"),
     ]);
-    setEnrollments(enrollData as Enrollment[]);
+    setEnrollments(enrollData as unknown as Enrollment[]);
     setUsers((usersData.data || []) as any);
     setCourses((coursesData.data || []) as any);
     setLoading(false);
