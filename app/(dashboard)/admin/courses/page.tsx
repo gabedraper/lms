@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Plus, Search, ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { createCourse } from "@/actions/courses";
+import { getCourseGradient } from "@/lib/course-colors";
 
 const ALPHABET = ["All", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
 
@@ -118,7 +119,7 @@ export default function AdminCoursesPage() {
               className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors group"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded bg-gradient-to-br from-blue-400 to-indigo-600 shrink-0" />
+                <div className={`w-8 h-8 rounded bg-gradient-to-br ${getCourseGradient(course.id)} shrink-0`} />
                 <div className="min-w-0">
                   <p className="font-medium text-sm truncate">{course.title}</p>
                   {course.description && (

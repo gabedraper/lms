@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { getCourseProgress } from "@/lib/progress";
-import { GraduationCap, Lock } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { getRoleLabel } from "@/lib/roles";
+import { getCourseGradient } from "@/lib/course-colors";
 
 export default async function LearnerDashboard() {
   const supabase = createClient();
@@ -114,7 +115,7 @@ function CourseGrid({ courses }: { courses: any[] }) {
       {courses.map((course) => (
         <Card key={course.id} className="overflow-hidden">
           <div
-            className="h-32 bg-gradient-to-br from-blue-400 to-indigo-600"
+            className={`h-32 bg-gradient-to-br ${getCourseGradient(course.id)}`}
             style={
               course.thumbnail_url
                 ? { backgroundImage: `url(${course.thumbnail_url})`, backgroundSize: "cover", backgroundPosition: "center" }

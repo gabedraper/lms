@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getCourseProgress } from "@/lib/progress";
+import { getCourseGradient } from "@/lib/course-colors";
 import {
   ArrowLeft,
   Video,
@@ -145,7 +146,7 @@ export default async function CourseOutlinePage({
       <div className="mb-8">
         <div className="flex items-start gap-6">
           <div
-            className="w-32 h-20 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-600 flex-shrink-0"
+            className={`w-32 h-20 rounded-lg bg-gradient-to-br ${getCourseGradient(params.courseId)} flex-shrink-0`}
             style={
               course.thumbnail_url
                 ? {

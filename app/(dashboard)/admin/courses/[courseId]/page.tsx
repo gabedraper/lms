@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Eye, Pencil, FileText } from "lucide-react";
+import { getCourseGradient } from "@/lib/course-colors";
 
 export default async function AdminCourseDetailPage({
   params,
@@ -55,11 +56,16 @@ export default async function AdminCourseDetailPage({
         All Courses
       </Link>
 
+      {/* Course hero */}
+      <div className={`h-40 rounded-xl bg-gradient-to-br ${getCourseGradient(params.courseId)} mb-8 flex items-end p-6`}>
+        <h1 className="text-3xl font-bold text-white drop-shadow">{course.title}</h1>
+      </div>
+
       {/* Course header */}
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold">{course.title}</h1>
+            <h1 className="text-2xl font-bold">{course.title}</h1>
             <Badge variant={course.is_published ? "default" : "secondary"}>
               {course.is_published ? "Published" : "Draft"}
             </Badge>

@@ -23,6 +23,7 @@ import {
   Trophy,
   Eye,
 } from "lucide-react";
+import { getCourseGradient, extractFirstImage } from "@/lib/course-colors";
 
 interface QuizQuestion {
   question: string;
@@ -247,27 +248,40 @@ export default function LessonViewerPage() {
         </div>
       )}
 
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="capitalize">
-              {lesson.type}
-            </Badge>
-            {lesson.duration_minutes && (
-              <span className="text-sm text-muted-foreground">
-                {lesson.duration_minutes} min
-              </span>
-            )}
-            {isCompleted && (
-              <Badge className="bg-green-100 text-green-700 border-green-200">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Completed
-              </Badge>
-            )}
+      {/* Lesson hero */}
+      {(() => {
+        const heroImage = content?.body ? extractFirstImage(content.body) : null;
+        const gradient = getCourseGradient(courseId);
+        return (
+          <div
+            className={`relative h-48 rounded-xl mb-6 overflow-hidden bg-gradient-to-br ${gradient} flex items-end`}
+            style={heroImage ? {
+              backgroundImage: `url(${heroImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            } : {}}
+          >
+            {heroImage && <div className="absolute inset-0 bg-black/40" />}
+            <div className="relative z-10 p-6 w-full">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-white/20 text-white border-white/30 capitalize backdrop-blur-sm">
+                  {lesson.type}
+                </Badge>
+                {lesson.duration_minutes && (
+                  <span className="text-sm text-white/80">{lesson.duration_minutes} min</span>
+                )}
+                {isCompleted && (
+                  <Badge className="bg-green-500/80 text-white border-transparent backdrop-blur-sm">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Completed
+                  </Badge>
+                )}
+              </div>
+              <h1 className="text-2xl font-bold text-white drop-shadow">{lesson.title}</h1>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold">{lesson.title}</h1>
-        </div>
-      </div>
+        );
+      })()}
 
       {progress > 0 && (
         <div className="mb-6">
