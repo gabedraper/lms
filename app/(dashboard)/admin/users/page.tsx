@@ -45,6 +45,7 @@ export default function AdminUsersPage() {
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("learner");
+  const [inviteError, setInviteError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const supabase = createClient();
@@ -66,17 +67,19 @@ export default function AdminUsersPage() {
   async function handleInvite() {
     if (!inviteEmail || !inviteName) return;
     setLoading(true);
+    setInviteError("");
     const result = await inviteUser(inviteEmail, inviteName, inviteRole);
     setLoading(false);
     if (result.success) {
-      showMessage(`Invite sent to ${inviteEmail}!`, "success");
       setInviteOpen(false);
       setInviteName("");
       setInviteEmail("");
       setInviteRole("learner");
+      setInviteError("");
+      showMessage(`Invite sent to ${inviteEmail}!`, "success");
       loadUsers();
     } else {
-      showMessage(result.error || "Failed to send invite", "error");
+      setInviteError(result.error || "Failed to send invite");
     }
   }
 
@@ -120,7 +123,7 @@ export default function AdminUsersPage() {
             Manage your team ({users.length} users)
           </p>
         </div>
-        <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <Dialog open={inviteOpen} onOpenChange={(open) => { setInviteOpen(open); if (!open) setInviteError(""); }}>
           <DialogTrigger asChild>
             <Button>
               <UserPlus className="h-4 w-4 mr-2" />
@@ -160,6 +163,11 @@ export default function AdminUsersPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {inviteError && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {inviteError}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">
                 They'll receive an email with a link to set their password and access the platform.
               </p>
