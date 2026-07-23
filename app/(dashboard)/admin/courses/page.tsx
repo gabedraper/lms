@@ -1,109 +1,138 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { BookOpen, Eye, Pencil, Plus } from "lucide-react";
+import { BookOpen, Plus, Search, ChevronRight } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { createCourse } from "@/actions/courses";
 
-async function handleCreate(formData: FormData) {
-  "use server";
-  const result = await createCourse(formData);
-  if (result?.success && result?.course?.id) {
-    redirect(`/instructor/courses/${result.course.id}`);
+const ALPHABET = ["All", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+
+export default function AdminCoursesPage() {
+  const [courses, setCourses] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [letter, setLetter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("courses")
+      .select("id, title, description, is_published")
+      .order("title")
+      .then(({ data }) => {
+        setCourses(data || []);
+        setLoading(false);
+      });
+  }, []);
+
+  async function handleCreate() {
+    setCreating(true);
+    const fd = new FormData();
+    fd.append("title", "New Course");
+    const result = await createCourse(fd);
+    if (result?.success && result?.course?.id) {
+      router.push(`/instructor/courses/${result.course.id}`);
+    }
+    setCreating(false);
   }
-}
 
-export default async function AdminCoursesPage() {
-  const supabase = createClient();
-
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("*, profiles(full_name)")
-    .order("created_at", { ascending: false });
+  const filtered = courses.filter((c) => {
+    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
+    const matchesLetter =
+      letter === "All" || c.title.toUpperCase().startsWith(letter);
+    return matchesSearch && matchesLetter;
+  });
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">All Courses</h1>
           <p className="text-muted-foreground mt-1">
-            Create and manage courses
+            {courses.length} courses total
           </p>
         </div>
-        <form action={handleCreate}>
-          <input type="hidden" name="title" value="New Course" />
-          <Button type="submit">
-            <Plus className="h-4 w-4 mr-2" />
-            New Course
-          </Button>
-        </form>
+        <Button onClick={handleCreate} disabled={creating}>
+          <Plus className="h-4 w-4 mr-2" />
+          {creating ? "Creating..." : "New Course"}
+        </Button>
       </div>
 
-      {(!courses || courses.length === 0) ? (
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search courses..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setLetter("All"); }}
+          className="pl-9"
+        />
+      </div>
+
+      {/* Alphabet filter */}
+      <div className="flex flex-wrap gap-1 mb-6">
+        {ALPHABET.map((l) => (
+          <button
+            key={l}
+            onClick={() => { setLetter(l); setSearch(""); }}
+            className={`px-2 py-1 text-xs rounded font-medium transition-colors ${
+              letter === l
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* Results count */}
+      {(search || letter !== "All") && (
+        <p className="text-sm text-muted-foreground mb-4">
+          {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+        </p>
+      )}
+
+      {/* Course list */}
+      {loading ? (
+        <div className="text-center py-16 text-muted-foreground">Loading...</div>
+      ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
           <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p>No courses created yet.</p>
+          <p>{courses.length === 0 ? "No courses yet." : "No courses match your search."}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: any) => (
-            <Card key={course.id} className="flex flex-col">
-              <div
-                className="h-32 rounded-t-lg bg-gradient-to-br from-blue-400 to-indigo-600"
-                style={
-                  course.thumbnail_url
-                    ? {
-                        backgroundImage: `url(${course.thumbnail_url})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }
-                    : {}
-                }
-              />
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base leading-snug">
-                    {course.title}
-                  </CardTitle>
-                  <Badge
-                    variant={course.is_published ? "default" : "secondary"}
-                    className="shrink-0"
-                  >
-                    {course.is_published ? "Published" : "Draft"}
-                  </Badge>
+        <div className="border rounded-lg divide-y overflow-hidden">
+          {filtered.map((course) => (
+            <Link
+              key={course.id}
+              href={`/admin/courses/${course.id}`}
+              className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded bg-gradient-to-br from-blue-400 to-indigo-600 shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate">{course.title}</p>
+                  {course.description && (
+                    <p className="text-xs text-muted-foreground truncate">{course.description}</p>
+                  )}
                 </div>
-                {course.description && (
-                  <CardDescription className="line-clamp-2">
-                    {course.description}
-                  </CardDescription>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  Instructor: {(course.profiles as any)?.full_name ?? "Unknown"}
-                </p>
-              </CardHeader>
-              <CardContent className="mt-auto pt-0 flex gap-2">
-                <Button asChild size="sm" className="flex-1">
-                  <Link href={`/learner/courses/${course.id}`}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview
-                  </Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href={`/instructor/courses/${course.id}`}>
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="flex items-center gap-3 shrink-0 ml-4">
+                <Badge variant={course.is_published ? "default" : "secondary"} className="text-xs">
+                  {course.is_published ? "Published" : "Draft"}
+                </Badge>
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+              </div>
+            </Link>
           ))}
         </div>
       )}
