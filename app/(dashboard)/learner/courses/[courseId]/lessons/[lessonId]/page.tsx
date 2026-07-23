@@ -194,7 +194,7 @@ export default function LessonViewerPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 max-w-4xl pb-20">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link href="/learner" className="hover:text-foreground">
@@ -445,6 +445,22 @@ export default function LessonViewerPage() {
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* Sticky bottom progress bar */}
+      <div className="fixed bottom-0 left-64 right-0 bg-background border-t px-6 py-3 z-10">
+        <div className="max-w-4xl flex items-center gap-4">
+          <span className="text-sm text-muted-foreground shrink-0">Course Progress</span>
+          <div className="flex-1">
+            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+          <span className="text-sm font-semibold shrink-0">{progress}%</span>
+        </div>
       </div>
 
       {/* Mark complete / navigation */}

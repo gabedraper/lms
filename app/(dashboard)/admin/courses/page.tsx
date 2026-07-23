@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Plus, Search, ChevronRight } from "lucide-react";
+import { BookOpen, Plus, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { createCourse } from "@/actions/courses";
 import { getCourseGradientStyle } from "@/lib/course-colors";
@@ -102,7 +102,7 @@ export default function AdminCoursesPage() {
         </p>
       )}
 
-      {/* Course list */}
+      {/* Course grid */}
       {loading ? (
         <div className="text-center py-16 text-muted-foreground">Loading...</div>
       ) : filtered.length === 0 ? (
@@ -111,27 +111,19 @@ export default function AdminCoursesPage() {
           <p>{courses.length === 0 ? "No courses yet." : "No courses match your search."}</p>
         </div>
       ) : (
-        <div className="border rounded-lg divide-y overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((course) => (
             <Link
               key={course.id}
               href={`/admin/courses/${course.id}`}
-              className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors group"
+              className="group rounded-xl border overflow-hidden hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded shrink-0" style={getCourseGradientStyle(course.id)} />
-                <div className="min-w-0">
-                  <p className="font-medium text-sm truncate">{course.title}</p>
-                  {course.description && (
-                    <p className="text-xs text-muted-foreground truncate">{course.description}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0 ml-4">
+              <div className="h-24" style={getCourseGradientStyle(course.id)} />
+              <div className="p-3">
+                <p className="font-medium text-sm line-clamp-2 leading-snug mb-1">{course.title}</p>
                 <Badge variant={course.is_published ? "default" : "secondary"} className="text-xs">
                   {course.is_published ? "Published" : "Draft"}
                 </Badge>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
               </div>
             </Link>
           ))}

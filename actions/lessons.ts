@@ -54,6 +54,7 @@ export async function updateLesson(
     type?: LessonType;
     content?: Record<string, unknown>;
     duration_minutes?: number;
+    owner_id?: string | null;
   }
 ) {
   const supabase = createClient();

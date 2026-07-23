@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { signOut } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,11 @@ import {
   Award,
   LogOut,
   BarChart2,
+  ClipboardList,
+  Trophy,
 } from "lucide-react";
 import { getRoleLabel } from "@/lib/roles";
+import { RolePreviewSelector } from "@/components/role-preview-selector";
 
 interface NavItem {
   href: string;
@@ -28,15 +32,17 @@ function getNavItems(role: string): NavItem[] {
     return [
       { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
       { href: "/admin/users", label: "Users", icon: <Users className="h-4 w-4" /> },
+      { href: "/admin/enrollments", label: "Enrollments", icon: <ClipboardList className="h-4 w-4" /> },
       { href: "/admin/role-training", label: "Role Training", icon: <Map className="h-4 w-4" /> },
       { href: "/admin/courses", label: "All Courses", icon: <BookOpen className="h-4 w-4" /> },
       { href: "/admin/progress", label: "Team Progress", icon: <BarChart2 className="h-4 w-4" /> },
+      { href: "/leaderboard", label: "Leaderboard", icon: <Trophy className="h-4 w-4" /> },
     ];
   }
-  // BDM, OBDM, SDR — all get the learner view
   return [
     { href: "/learner", label: "My Training", icon: <GraduationCap className="h-4 w-4" /> },
     { href: "/learner/certificates", label: "Certificates", icon: <Award className="h-4 w-4" /> },
+    { href: "/leaderboard", label: "Leaderboard", icon: <Trophy className="h-4 w-4" /> },
   ];
 }
 
@@ -62,16 +68,23 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
-  const role = profile?.role || "learner";
-  const navItems = getNavItems(role);
+  const actualRole = profile?.role || "learner";
+
+  // Read preview role cookie (only honored if user is admin)
+  const cookieStore = await cookies();
+  const previewRole = actualRole === "admin" ? (cookieStore.get("preview_role")?.value ?? null) : null;
+
+  const role = previewRole ?? actualRole;
+  const navItems = getNavItems(actualRole === "admin" && !previewRole ? "admin" : role);
+  const homeHref = actualRole === "admin" && !previewRole ? "/admin" : "/learner";
   const lmsName = process.env.NEXT_PUBLIC_LMS_NAME || "Team Learning Academy";
 
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside className="w-64 border-r bg-card flex flex-col">
-        <div className="p-6">
-          <div className="flex items-center gap-2">
+        <div className="p-6 pb-4">
+          <Link href={homeHref} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Image
               src="https://facturmfg.com/wp-content/uploads/2022/11/Factur-Logo-300x94.png"
               alt="Factur logo"
@@ -80,7 +93,7 @@ export default async function DashboardLayout({
               className="object-contain"
             />
             <span className="font-semibold text-sm leading-tight">Learning Academy</span>
-          </div>
+          </Link>
         </div>
 
         <Separator />
@@ -92,7 +105,9 @@ export default async function DashboardLayout({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground">{getRoleLabel(role)}</p>
+              <p className="text-xs text-muted-foreground">
+                {previewRole ? `Previewing: ${getRoleLabel(previewRole)}` : getRoleLabel(actualRole)}
+              </p>
             </div>
           </div>
         </div>
@@ -109,6 +124,14 @@ export default async function DashboardLayout({
             </Link>
           ))}
         </nav>
+
+        {/* Role preview selector — admin only */}
+        {actualRole === "admin" && (
+          <>
+            <Separator className="mx-3" />
+            <RolePreviewSelector currentPreviewRole={previewRole} />
+          </>
+        )}
 
         <div className="p-3">
           <Separator className="mb-3" />

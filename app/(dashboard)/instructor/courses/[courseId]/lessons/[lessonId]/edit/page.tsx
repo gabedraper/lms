@@ -46,6 +46,7 @@ interface Lesson {
   content: LessonContent | null;
   duration_minutes: number | null;
   module_id: string;
+  owner_id: string | null;
   modules: { course_id: string } | null;
 }
 
@@ -65,11 +66,16 @@ export default function LessonEditPage() {
   const [fileUrl, setFileUrl] = useState("");
   const [fileName, setFileName] = useState("");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [ownerId, setOwnerId] = useState("");
+  const [allUsers, setAllUsers] = useState<{ id: string; full_name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     loadLesson();
+    supabase.from("profiles").select("id, full_name").order("full_name").then(({ data }) => {
+      setAllUsers(data || []);
+    });
   }, [lessonId]);
 
   async function loadLesson() {
@@ -84,6 +90,7 @@ export default function LessonEditPage() {
       setTitle(data.title);
       setType(data.type);
       setDuration(data.duration_minutes?.toString() || "");
+      setOwnerId(data.owner_id || "");
       const c = data.content as LessonContent | null;
       if (c) {
         setVideoUrl(c.url || "");
@@ -117,6 +124,7 @@ export default function LessonEditPage() {
       type: type as "video" | "text" | "quiz" | "file",
       content: buildContent() as Record<string, unknown>,
       duration_minutes: duration ? parseInt(duration) : undefined,
+      owner_id: ownerId || null,
     });
     setSaving(false);
     setSaved(true);
@@ -198,6 +206,20 @@ export default function LessonEditPage() {
                   placeholder="e.g. 15"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Content Owner</Label>
+              <Select value={ownerId} onValueChange={setOwnerId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select owner..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No owner</SelectItem>
+                  {allUsers.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

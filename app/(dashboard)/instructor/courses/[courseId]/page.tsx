@@ -66,6 +66,7 @@ interface Course {
   description: string | null;
   is_published: boolean;
   thumbnail_url: string | null;
+  instructor_id: string | null;
 }
 
 const lessonTypeIcons: Record<string, React.ReactNode> = {
@@ -92,10 +93,15 @@ export default function CourseEditorPage() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editOwnerId, setEditOwnerId] = useState("");
+  const [allUsers, setAllUsers] = useState<{ id: string; full_name: string }[]>([]);
 
   useEffect(() => {
     loadCourse();
     loadModules();
+    supabase.from("profiles").select("id, full_name").order("full_name").then(({ data }) => {
+      setAllUsers(data || []);
+    });
   }, [courseId]);
 
   async function loadCourse() {
@@ -202,9 +208,22 @@ export default function CourseEditorPage() {
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="Course description (optional)"
                 />
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Content Owner</Label>
+                  <Select value={editOwnerId} onValueChange={setEditOwnerId}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Select owner..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allUsers.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={async () => {
-                    await updateCourse(courseId, { title: editTitle, description: editDescription });
+                    await updateCourse(courseId, { title: editTitle, description: editDescription, instructor_id: editOwnerId || undefined });
                     setEditingTitle(false);
                     loadCourse();
                   }}>Save</Button>
@@ -222,6 +241,7 @@ export default function CourseEditorPage() {
                 <Button size="sm" variant="ghost" className="mt-1" onClick={() => {
                   setEditTitle(course.title);
                   setEditDescription(course.description || "");
+                  setEditOwnerId(course.instructor_id || "");
                   setEditingTitle(true);
                 }}>
                   <Pencil className="h-4 w-4" />

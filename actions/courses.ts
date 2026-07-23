@@ -43,6 +43,7 @@ export async function updateCourse(
     description?: string;
     thumbnail_url?: string;
     is_published?: boolean;
+    instructor_id?: string;
   }
 ) {
   const supabase = createClient();

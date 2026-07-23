@@ -134,7 +134,7 @@ export default async function CourseOutlinePage({
   }
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-8 max-w-4xl pb-24">
       <Button variant="ghost" asChild className="mb-6 -ml-2">
         <Link href="/learner">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -274,6 +274,24 @@ export default async function CourseOutlinePage({
           </div>
         )}
       </div>
+
+      {/* Sticky bottom progress bar */}
+      {isEnrolled && allLessonIds.length > 0 && (
+        <div className="fixed bottom-0 left-64 right-0 bg-background border-t px-8 py-3 z-10">
+          <div className="max-w-4xl flex items-center gap-4">
+            <span className="text-sm text-muted-foreground shrink-0">Course Progress</span>
+            <div className="flex-1">
+              <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+            <span className="text-sm font-semibold shrink-0">{progress}%</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
