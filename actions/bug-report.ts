@@ -4,10 +4,28 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 
 const BUG_REPORT_RECIPIENT = "gabe@bethefactur.com";
+const MAX_SCREENSHOT_BYTES = 6 * 1024 * 1024;
 
-export async function submitBugReport(description: string, pageUrl: string) {
+export async function submitBugReport(
+  description: string,
+  pageUrl: string,
+  screenshot?: { dataUrl: string; filename: string } | null
+) {
   if (!description.trim()) {
     return { success: false, error: "Please describe the bug before sending." };
+  }
+
+  let attachments: { filename: string; content: string }[] | undefined;
+  if (screenshot) {
+    const match = screenshot.dataUrl.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/);
+    if (!match) {
+      return { success: false, error: "Invalid screenshot format." };
+    }
+    const base64Content = match[1];
+    if (base64Content.length * 0.75 > MAX_SCREENSHOT_BYTES) {
+      return { success: false, error: "Screenshot is too large (max 6MB)." };
+    }
+    attachments = [{ filename: screenshot.filename, content: base64Content }];
   }
 
   const supabase = createClient();
@@ -38,6 +56,7 @@ export async function submitBugReport(description: string, pageUrl: string) {
       "",
       description,
     ].join("\n"),
+    attachments,
   });
 
   if (error) {
