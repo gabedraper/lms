@@ -46,6 +46,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (user && pathname.startsWith("/admin")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return NextResponse.redirect(new URL("/learner", request.url));
+    }
+  }
+
   // If logged in and hitting auth pages, redirect to appropriate dashboard
   if (user && (pathname === "/login" || pathname === "/signup")) {
     return NextResponse.redirect(new URL("/learner", request.url));

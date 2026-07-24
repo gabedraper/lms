@@ -15,20 +15,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BookOpen } from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("learner");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -45,7 +37,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { full_name: fullName, role },
+        data: { full_name: fullName },
       },
     });
 
@@ -56,27 +48,10 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      // Insert profile
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        full_name: fullName,
-        role,
-      });
-
-      if (profileError) {
-        setError(profileError.message);
-        setLoading(false);
-        return;
-      }
-
-      const roleRoutes: Record<string, string> = {
-        admin: "/admin",
-        manager: "/manager",
-        instructor: "/instructor",
-        learner: "/learner",
-      };
-
-      router.push(roleRoutes[role] || "/learner");
+      // Profile row (role: learner) is created server-side by the
+      // handle_new_user database trigger, which also enforces the
+      // company-domain restriction.
+      router.push("/learner");
       router.refresh();
     }
   }
@@ -132,20 +107,6 @@ export default function SignupPage() {
                 required
                 minLength={6}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="learner">Learner</SelectItem>
-                  <SelectItem value="instructor">Instructor</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-3">

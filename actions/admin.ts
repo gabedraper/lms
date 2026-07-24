@@ -1,9 +1,11 @@
 "use server";
 
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/supabase/require-admin";
 import { revalidatePath } from "next/cache";
 
 export async function getUsersWithEmails() {
+  await requireAdmin();
   const supabase = createServiceClient();
 
   const { data: profiles } = await supabase
@@ -22,6 +24,7 @@ export async function getUsersWithEmails() {
 }
 
 export async function inviteUser(email: string, fullName: string, role: string) {
+  await requireAdmin();
   const supabase = createServiceClient();
 
   const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
@@ -48,6 +51,7 @@ export async function inviteUser(email: string, fullName: string, role: string) 
 }
 
 export async function updateUserRole(userId: string, role: string) {
+  await requireAdmin();
   const supabase = createServiceClient();
 
   const { error } = await supabase
@@ -61,6 +65,7 @@ export async function updateUserRole(userId: string, role: string) {
 }
 
 export async function sendPasswordReset(email: string) {
+  await requireAdmin();
   const supabase = createServiceClient();
 
   const { error } = await supabase.auth.admin.generateLink({
@@ -76,6 +81,7 @@ export async function sendPasswordReset(email: string) {
 }
 
 export async function deleteUser(userId: string) {
+  await requireAdmin();
   const supabase = createServiceClient();
 
   const { error } = await supabase.auth.admin.deleteUser(userId);
