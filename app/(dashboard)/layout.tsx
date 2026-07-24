@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { getRoleLabel } from "@/lib/roles";
 import { RolePreviewSelector } from "@/components/role-preview-selector";
+import { BugReportWidget } from "@/components/bug-report-widget";
 
 interface NavItem {
   href: string;
@@ -135,6 +136,7 @@ export default async function DashboardLayout({
 
         <div className="p-3">
           <Separator className="mb-3" />
+          <BugReportWidget />
           <form action={signOut}>
             <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground" size="sm" type="submit">
               <LogOut className="h-4 w-4" />
