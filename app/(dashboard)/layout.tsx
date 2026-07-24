@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getAuthedUser, getProfile } from "@/lib/supabase/session";
 import { signOut } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -52,22 +52,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const serviceClient = createServiceClient();
-  const { data: profile } = await serviceClient
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const profile = await getProfile(user.id);
 
   const actualRole = profile?.role || "learner";
 

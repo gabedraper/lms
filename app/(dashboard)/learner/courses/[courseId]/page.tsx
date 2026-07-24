@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthedUser } from "@/lib/supabase/session";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -65,9 +66,7 @@ export default async function CourseOutlinePage({
 }) {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) return null;
 

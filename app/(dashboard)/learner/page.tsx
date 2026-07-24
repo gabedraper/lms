@@ -1,4 +1,5 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getAuthedUser, getProfile } from "@/lib/supabase/session";
 import Link from "next/link";
 import {
   Card,
@@ -19,37 +20,31 @@ export default async function LearnerDashboard() {
   const supabase = createClient();
   const serviceClient = createServiceClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) return null;
 
   // Get user's role
-  const { data: profile } = await serviceClient
-    .from("profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single();
+  const profile = await getProfile(user.id);
 
   const role = profile?.role || "sdr";
 
-  // Get courses assigned to this role
-  const { data: roleCourses } = await serviceClient
-    .from("role_courses")
-    .select("course_id, courses(id, title, description, thumbnail_url, is_published)")
-    .eq("role", role);
+  // Get courses assigned to this role, and this user's enrollments, in parallel
+  const [{ data: roleCourses }, { data: enrollments }] = await Promise.all([
+    serviceClient
+      .from("role_courses")
+      .select("course_id, courses(id, title, description, thumbnail_url, is_published)")
+      .eq("role", role),
+    supabase
+      .from("enrollments")
+      .select("course_id, completed_at, enrolled_at")
+      .eq("user_id", user.id),
+  ]);
 
   const assignedCourses = (roleCourses || [])
     .map((rc: any) => rc.courses)
     .filter(Boolean)
     .filter((c: any) => c.is_published);
-
-  // Get existing enrollments for this user
-  const { data: enrollments } = await supabase
-    .from("enrollments")
-    .select("course_id, completed_at, enrolled_at")
-    .eq("user_id", user.id);
 
   const enrollmentMap: Record<string, { completed_at: string | null }> = {};
   (enrollments || []).forEach((e: any) => {

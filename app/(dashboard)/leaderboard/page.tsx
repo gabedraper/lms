@@ -1,13 +1,12 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthedUser } from "@/lib/supabase/session";
 import { getRoleLabel } from "@/lib/roles";
 import { Trophy, Medal } from "lucide-react";
 
 export default async function LeaderboardPage() {
   const supabase = createServiceClient();
-  const authClient = createClient();
 
-  const { data: { user } } = await authClient.auth.getUser();
+  const user = await getAuthedUser();
   if (!user) return null;
 
   // Get all profiles

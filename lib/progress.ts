@@ -6,21 +6,11 @@ export async function getCourseProgress(
   courseId: string
 ): Promise<number> {
   try {
-    // Get all modules for the course
-    const { data: modules, error: modulesError } = await supabase
-      .from("modules")
-      .select("id")
-      .eq("course_id", courseId);
-
-    if (modulesError || !modules || modules.length === 0) return 0;
-
-    const moduleIds = modules.map((m) => m.id);
-
-    // Get total lessons
+    // Get all lessons for the course in one query (joined through modules)
     const { data: lessons, error: lessonsError } = await supabase
       .from("lessons")
-      .select("id")
-      .in("module_id", moduleIds);
+      .select("id, modules!inner(course_id)")
+      .eq("modules.course_id", courseId);
 
     if (lessonsError || !lessons || lessons.length === 0) return 0;
 

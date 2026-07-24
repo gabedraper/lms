@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthedUser } from "@/lib/supabase/session";
 import Link from "next/link";
 import {
   Card,
@@ -16,9 +17,7 @@ import { Users } from "lucide-react";
 export default async function ManagerDashboard() {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) return null;
 

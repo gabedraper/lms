@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthedUser } from "@/lib/supabase/session";
 import {
   Card,
   CardContent,
@@ -14,9 +15,7 @@ import Link from "next/link";
 export default async function CertificatesPage() {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) return null;
 
